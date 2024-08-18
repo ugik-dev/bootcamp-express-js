@@ -1,0 +1,57 @@
+<% layout('layout/app') %>
+<h1>List peoples</h1>
+<a class="btn btn-primary me-2" href="/">Home</a>
+<a class="btn btn-primary" href="/people/create">Create New</a><br />
+
+<table border="1" class="table mt-2">
+  <tr>
+    <td>ID</td>
+    <td>Nama</td>
+    <td>Alamat</td>
+    <!-- <td>Foto</td> -->
+    <td>Tgl Lahir</td>
+    <td>Umur</td>
+    <td>Orang Tua</td>
+    <td>Action</td>
+  </tr>
+
+  <% for(let people of peoples){ %>
+  <tr>
+    <td><%= people._id %></td>
+    <td><%= people.name %></td>
+    <td><%= people.address %></td>
+    <td>
+      <img style="width: 50px" src="/images/default.jpg" alt="" />
+    </td>
+    <!-- <td><%= people.image ? people.image : '-' %></td> -->
+    <td><%= people.dob.toISOString().substring(0, 10) %></td>
+    <td><%= people.age %></td>
+    <td><%= people.parent_name %></td>
+
+    <td>
+      <a class="btn btn-info" href="/people/detail/<%= people._id %>"
+        >Detail
+      </a>
+      <% if(currentUser && people.author.equals(currentUser._id)) { %>
+      <a class="btn btn-success" href="/people/edit/<%= people._id %>">Edit </a>
+      <a class="btn btn-danger" href="#" onclick="deleteF('<%= people._id %>')"
+        >Delete
+      </a>
+      <% } %>
+    </td>
+  </tr>
+  <% } %>
+</table>
+<script>
+  async function deleteF(id) {
+    try {
+      const response = await axios.delete("<%= base_url %>/people/" + id);
+      alert("response :" + response.data.message);
+      //   window.location.href = "/people";
+      window.location.reload();
+    } catch (error) {
+      alert("error :", error.message);
+      console.log(error);
+    }
+  }
+</script>

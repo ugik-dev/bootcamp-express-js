@@ -1,0 +1,79 @@
+<% layout('layout/app') %>
+<h1>List places</h1>
+<a class="btn btn-primary me-2" href="/">Home</a>
+<a class="btn btn-primary" href="/place/create">Create New</a><br />
+
+<% for(let place of places){ %>
+<div class="card mb-3">
+  <div class="row">
+    <div class="col-md-4">
+      <img
+        src="<%= place.image ? place.image : '-' %>"
+        alt="<%= place.title %>"
+        class="img-fluid"
+      />
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title"><%= place.title %></h5>
+        <p class="card-text">
+          Location : <b class="text-secondary"><%= place.location %></b>
+        </p>
+        <p class="card-text">Price : Rp. <%= place.price %></p>
+        <p class="card-text"><%= place.description %></p>
+
+        <a href="/place/detail/<%= place._id %>" class="btn btn-primary"
+          >View
+        </a>
+        <a class="btn btn-success" href="/place/edit/<%= place._id %>">Edit </a>
+        <a class="btn btn-danger" href="#" onclick="deleteF('<%= place._id %>')"
+          >Delete
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+<table border="1" class="table mt-2">
+  <tr>
+    <td>ID</td>
+    <td>Title</td>
+    <td>Location</td>
+    <td>-</td>
+    <td>Price</td>
+    <td>Description</td>
+    <td>_v</td>
+  </tr>
+
+  <% for(let place of places){ %>
+  <tr>
+    <td><%= place._id %></td>
+    <td><%= place.title %></td>
+    <td><%= place.location %></td>
+    <!-- <td><%= place.image ? place.image : '-' %></td> -->
+    <td><%= place.price %></td>
+    <td><%= place.description %></td>
+
+    <td>
+      <a class="btn btn-info" href="/place/detail/<%= place._id %>">Detail </a>
+      <a class="btn btn-success" href="/place/edit/<%= place._id %>">Edit </a>
+      <a class="btn btn-danger" href="#" onclick="deleteF('<%= place._id %>')"
+        >Delete
+      </a>
+    </td>
+  </tr>
+  <% } %>
+</table>
+<script>
+  async function deleteF(id) {
+    try {
+      const response = await axios.delete("<%= base_url %>/place/" + id);
+      alert("response :" + response.data.message);
+      //   window.location.href = "/place";
+      window.location.reload();
+    } catch (error) {
+      alert("error :", error.message);
+      console.log(error);
+    }
+  }
+</script>

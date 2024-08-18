@@ -1,0 +1,54 @@
+<% layout('layout/app') %>
+<div class="row">
+  <div class="col-6 offset-3">
+    <div class="card">
+      <img src="<%= place.image %>" class="card-img-top" />
+      <div class="card-body">
+        <h5 class="card-title"><%= place.title %></h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">
+          <%= place.contact %>
+        </h6>
+        <p class="card-text">Location : <%= place.location %></p>
+        <p class="card-text">Price : Rp <%= place.price %></p>
+        <p class="card-text"><%= place.description %></p>
+        <a href="/place/add-product/<%= place._id %>" class="card-link"
+          >Add Product</a
+        >
+        <a class="card-link" href="/place/edit/<%= place._id %>"
+          ><i class="bi bi-8-circle-fill"></i>Edit
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+<table border="1" class="table">
+  <tr>
+    <td>ID</td>
+    <td>Name</td>
+    <td>Brand</td>
+    <td>Price</td>
+    <td>Size</td>
+    <td>_v</td>
+  </tr>
+
+  <% for(let product of []){ %>
+  <tr>
+    <td><%= product._id %></td>
+    <td><%= product.name %></td>
+    <td><%= product.brand %></td>
+    <td><%= product.price %></td>
+    <td><%= product.size %></td>
+
+    <td>
+      <a
+        class="btn btn-success"
+        href="/place/edit-product/<%= place._id %>/<%= product._id %>"
+        >Edit
+      </a>
+      <a class="btn btn-danger" href="#" onclick="deleteF('<%= product._id %>')"
+        >Delete
+      </a>
+    </td>
+  </tr>
+  <% } %>
+</table>

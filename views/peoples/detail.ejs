@@ -1,0 +1,302 @@
+<% layout('layout/app') %>
+<div class="row">
+  <div class="col-6 offset-3">
+    <div class="card">
+      <img src="<%= people.image %>" class="card-img-top" />
+      <div class="card-body">
+        <h5 class="card-title"><%= people.name %></h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">
+          <%= people.age %>
+        </h6>
+        <p class="card-text">Tanggal Lahir : <%= people.dob %></p>
+        <p class="card-text">Alamat : <%= people.address %></p>
+        <p class="card-text">Nama Orang Tua : Rp <%= people.parent_name %></p>
+        <button type="button" class="btn btn-primary" id="addEvent">
+          Add Event
+        </button>
+        <a class="card-link" href="/people/edit/<%= people._id %>"
+          ><i class="bi bi-8-circle-fill"></i>Edit
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="row">
+      <% for(let image of people.images ){ %>
+        <div class="col-6">
+        <img src="/upload/<%= image.filename %>" class="image-fluit" />
+        </div>
+      <% } %>
+    </div>
+  </col-6>
+</div>
+
+<div
+  class="modal fade"
+  id="modalForm"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="post_form" class="needs-validation" novalidate>
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <input id="currentId" disabled />
+          <div class="mb-3">
+            <label for="indikasi" class="form-label">Indikasi</label>
+            <select class="form-control" name="indikasi" id="indikasi" required>
+              <option value="">Pilih Indikasi</option>
+              <option value="imunisasi">Imunisasi</option>
+              <option value="stunting">Stunting</option>
+              <option value="normal">Nomral</option>
+            </select>
+            <div class="valid-feedback">Looks good!</div>
+            <div class="invalid-feedback">Please check!!.</div>
+          </div>
+          <div class="mb-3">
+            <label for="time" class="form-label">Nama</label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              name="time"
+              id="time"
+              required
+            />
+            <div class="valid-feedback">Looks good!</div>
+            <div class="invalid-feedback">Please check!!.</div>
+          </div>
+          <div class="mb-3">
+            <label for="location" class="form-label">Lokasi</label>
+            <input
+              type="text"
+              class="form-control"
+              name="location"
+              id="location"
+              required
+            />
+            <div class="valid-feedback">Looks good!</div>
+            <div class="invalid-feedback">Please check!!.</div>
+          </div>
+          <div class="mb-3">
+            <label for="bidan" class="form-label">Bidan</label>
+            <input
+              type="text"
+              class="form-control"
+              name="bidan"
+              id="bidan"
+              required
+            />
+            <div class="valid-feedback">Looks good!</div>
+            <div class="invalid-feedback">Please check!!.</div>
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">Catatan</label>
+            <textarea
+              rows="3"
+              class="form-control"
+              id="note"
+              name="note"
+            ></textarea>
+            <div class="valid-feedback">Looks good!</div>
+            <div class="invalid-feedback">Please check!!.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+          <button
+            class="btn btn-primary me-4"
+            id="addBtn"
+            type="submit"
+            data-action="post"
+          >
+            Simpan
+          </button>
+          <button
+            class="btn btn-primary me-4"
+            type="submit"
+            id="updateBtn"
+            data-action="patch"
+          >
+            Update
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<table border="1" class="table" id="peopleEvent">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Indikasi</th>
+      <th>Lokasi</th>
+      <th>Waktu</th>
+      <th>Bidan</th>
+      <th>Catatan</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+</table>
+
+<script>
+  $(document).ready(function () {
+    const forms = document.querySelectorAll("#post_form");
+    const formJQ = $("#post_form");
+    const modalForm = $("#modalForm");
+
+    DataTable = $("#peopleEvent").DataTable({
+      pageLength: 10,
+    });
+
+    let dataEvents;
+    const getDatatable = async () => {
+      try {
+        const response = await axios.get(
+          "<%= `${base_url}/people/events/${people._id}` %>"
+        );
+        dataEvents = response.data;
+        renderDatatable(response.data);
+      } catch (error) {
+        alert("Error :" + error.response.data);
+        console.log(error.response.data);
+      }
+    };
+
+    getDatatable();
+
+    function renderDatatable(datas) {
+      if (datas == null || typeof datas != "object") {
+        console.log("Dasar::UNKNOWN DATA");
+        return;
+      }
+      console.log("s");
+      var i = 0;
+      var renderData = [];
+      Object.values(dataEvents).forEach((data, index) => {
+        var editButton = `
+        <a class="btn btn-secondary edit" data-id='${index}'><i class='fa fa-pencil'></i> Edit</a>
+      `;
+        var deleteButton = `
+        <a class="btn btn-danger delete" data-id='${index}'><i class='fa fa-trash'></i> Hapus</a>
+      `;
+        var button = `
+            ${editButton}
+            ${deleteButton}
+            `;
+        renderData.push([
+          data._id,
+          data.indikasi,
+          data.time,
+          data.location,
+          data.bidan,
+          data.note,
+          button,
+        ]);
+      });
+      DataTable.clear().rows.add(renderData).draw("full-hold");
+    }
+
+    function formatDateTimeForInput(datetime) {
+      const date = new Date(datetime);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Bulan dimulai dari 0
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    $("#addEvent").on("click", () => {
+      modalForm.modal("show");
+      modalForm.find("#addBtn").show();
+      modalForm.find("#updateBtn").hide();
+      formJQ.trigger("reset");
+    });
+    DataTable.on("click", ".edit", function () {
+      modalForm.modal("show");
+      modalForm.find("#addBtn").hide();
+      modalForm.find("#updateBtn").show();
+      formJQ.trigger("reset");
+      index = $(this).data("id");
+      const currentData = dataEvents[index];
+      console.log("edit", dataEvents[index]);
+      formJQ.find("#currentId").val(currentData._id);
+      formJQ.find("#indikasi").val(currentData.indikasi);
+      formJQ.find("#location").val(currentData.location);
+      formJQ.find("#bidan").val(currentData.bidan);
+      formJQ.find("#note").val(currentData.note);
+      formJQ.find("#time").val(formatDateTimeForInput(currentData.time));
+    });
+    DataTable.on("click", ".delete", async function () {
+      index = $(this).data("id");
+      const currentData = dataEvents[index];
+      try {
+        response = await axios.delete(
+          backend_url + "/" + dataEvents[index]._id
+        );
+        alert("Response :" + response.data.message);
+        getDatatable();
+        modalForm.modal("hide");
+      } catch (error) {
+        alert("Error :" + error.response);
+        console.log(error.response.data);
+      }
+    });
+    const backend_url = "<%= `${base_url}/people/events/${people._id}` %>";
+    Array.from(forms).forEach((form) => {
+      form.addEventListener(
+        "submit",
+        async (event) => {
+          console.log($(this));
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          } else {
+            event.preventDefault(); // Prevent default submit behavior
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            const actionType = event.submitter.getAttribute("data-action");
+
+            try {
+              if (actionType === "post") {
+                response = await axios.post(backend_url, data);
+              } else if (actionType === "patch") {
+                currentId = formJQ.find("#currentId").val();
+                response = await axios.patch(
+                  backend_url + "/" + currentId,
+                  data
+                );
+              }
+              alert("Response :" + response.data.message);
+              getDatatable();
+              modalForm.modal("hide");
+            } catch (error) {
+              alert("Error :" + error.response.data);
+              console.log(error.response.data);
+            }
+          }
+
+          form.classList.add("was-validated");
+        },
+        false
+      );
+    });
+  });
+</script>
